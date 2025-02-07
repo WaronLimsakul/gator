@@ -58,13 +58,8 @@ func ReadConfig() (Config, error) {
 }
 
 func (c *Config) SetUser(userName string) error {
-	conf, err := ReadConfig()
-	if err != nil {
-		return fmt.Errorf("error reading a config file")
-	}
-
-	conf.CurrentUsername = userName
-	err = writeConfig(conf)
+	c.CurrentUsername = userName
+	err := writeConfig(*c)
 	if err != nil {
 		return fmt.Errorf("error writing a config file")
 	}
