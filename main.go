@@ -62,6 +62,7 @@ func main() {
 	gatorCommands.registerCommand("register", handlerRegister)
 	gatorCommands.registerCommand("reset", handlerReset)
 	gatorCommands.registerCommand("users", handlerUsersList)
+	gatorCommands.registerCommand("agg", handlerAggregator)
 
 	// open database connection
 	db, err := sql.Open("postgres", curState.config.DbUrl)

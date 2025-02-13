@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/WaronLimsakul/gator/internal/database"
+	"github.com/WaronLimsakul/gator/internal/rss"
 	"github.com/google/uuid"
 )
 
@@ -85,5 +86,14 @@ func handlerUsersList(s *state, cmd command) error {
 			fmt.Printf("* %s\n", user.Name)
 		}
 	}
+	return nil
+}
+
+func handlerAggregator(s *state, cmd command) error {
+	fetchedFeed, err := rss.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v", *fetchedFeed)
 	return nil
 }
