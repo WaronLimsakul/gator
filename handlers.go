@@ -70,6 +70,12 @@ func handlerReset(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
+
+	err = s.db.ResetFeeds(context.Background())
+	if err != nil {
+		return err
+	}
+
 	fmt.Println("Database reset")
 	return nil
 }
@@ -95,5 +101,39 @@ func handlerAggregator(s *state, cmd command) error {
 		return err
 	}
 	fmt.Printf("%v", *fetchedFeed)
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) != 2 {
+		fmt.Println("2 arguments required")
+		os.Exit(1)
+	}
+
+	feedNameInput, urlInput := cmd.args[0], cmd.args[1]
+
+	currentUser, err := s.db.GetUser(context.Background(), s.config.CurrentUsername)
+	if err != nil {
+		return err
+	}
+
+	feedParams := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      feedNameInput,
+		Url:       urlInput,
+		UserID:    currentUser.ID,
+	}
+
+	createdFeed, err := s.db.CreateFeed(context.Background(), feedParams)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("feed created. Feed data:")
+	fmt.Printf("%v", createdFeed)
+
+	os.Exit(0)
 	return nil
 }
