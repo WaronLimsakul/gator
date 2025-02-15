@@ -131,8 +131,23 @@ func handlerAddFeed(s *state, cmd command) error {
 		return err
 	}
 
+	feedFollowParam := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    currentUser.ID,
+		FeedID:    createdFeed.ID,
+	}
+
+	_, err = s.db.CreateFeedFollow(context.Background(), feedFollowParam)
+	if err != nil {
+		return err
+	}
+
 	fmt.Println("feed created. Feed data:")
-	fmt.Printf("%v", createdFeed)
+	fmt.Printf("name: %s\n", createdFeed.Name)
+	fmt.Printf("url: %s\n", createdFeed.Url)
+	fmt.Printf("user id: %s\n", createdFeed.UserID)
 
 	os.Exit(0)
 	return nil
@@ -151,6 +166,60 @@ func handlerFeedsList(s *state, cmd command) error {
 			return err
 		}
 		fmt.Printf("Name: %s | Url: %s | Creator: %s\n", feed.Name, feed.Url, creator.Name)
+	}
+
+	return nil
+}
+
+func handlerFollow(s *state, cmd command) error {
+	if len(cmd.args) != 1 {
+		fmt.Println("a single argument needed")
+		return fmt.Errorf("a single argument needed")
+	}
+	inputUrl := cmd.args[0]
+
+	creator, err := s.db.GetUser(context.Background(), s.config.CurrentUsername)
+	if err != nil {
+		return err
+	}
+
+	feed, err := s.db.GetFeedFromUrl(context.Background(), inputUrl)
+	if err != nil {
+		return err
+	}
+
+	feedFollowParam := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		UserID:    creator.ID,
+		FeedID:    feed.ID,
+	}
+
+	_, err = s.db.CreateFeedFollow(context.Background(), feedFollowParam)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Following success! data:")
+	fmt.Printf("feed name: %s | current user: %s", feed.Name, s.config.CurrentUsername)
+	return nil
+}
+
+func handlerFollowsList(s *state, cmd command) error {
+	currentUser, err := s.db.GetUser(context.Background(), s.config.CurrentUsername)
+
+	if err != nil {
+		return err
+	}
+
+	followingFeeds, err := s.db.GetFeedFollowForUser(context.Background(), currentUser.ID)
+	if err != nil {
+		return err
+	}
+
+	for _, feed := range followingFeeds {
+		fmt.Printf("feed name: %s\n", feed.FeedName)
 	}
 
 	return nil
