@@ -39,7 +39,7 @@ func (c *commands) registerCommand(name string, f func(*state, command) error) {
 func (c *commands) run(s *state, cmd command) error {
 	handler, ok := c.cmdMap[cmd.name]
 	if !ok {
-		return fmt.Errorf("'%s' not found", cmd.name)
+		return fmt.Errorf("command '%s' not found", cmd.name)
 	}
 
 	if err := handler(s, cmd); err != nil {
@@ -64,6 +64,7 @@ func main() {
 	gatorCommands.registerCommand("users", handlerUsersList)
 	gatorCommands.registerCommand("agg", handlerAggregator)
 	gatorCommands.registerCommand("addfeed", handlerAddFeed)
+	gatorCommands.registerCommand("feeds", handlerFeedsList)
 
 	// open database connection
 	db, err := sql.Open("postgres", curState.config.DbUrl)
