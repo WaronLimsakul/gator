@@ -277,3 +277,16 @@ func handlerBrowse(s *state, cmd command) error {
 
 	return nil
 }
+
+func handlerSetDB(s *state, cmd command) error {
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("A single database url required")
+	}
+	url := cmd.args[0]
+
+	if err := s.config.SetDBUrl(url); err != nil {
+		return err
+	}
+	fmt.Println("Database URL set")
+	return nil
+}

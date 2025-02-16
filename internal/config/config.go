@@ -65,3 +65,12 @@ func (c *Config) SetUser(userName string) error {
 	}
 	return nil
 }
+
+func (c *Config) SetDBUrl(url string) error {
+	c.DbUrl = url
+	err := writeConfig(*c)
+	if err != nil {
+		return fmt.Errorf("error writing a config file")
+	}
+	return nil
+}

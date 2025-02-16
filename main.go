@@ -60,6 +60,7 @@ func main() {
 
 	gatorCommands.registerCommand("login", handlerLogin)
 	gatorCommands.registerCommand("register", handlerRegister)
+	gatorCommands.registerCommand("setdb", handlerSetDB)
 	gatorCommands.registerCommand("reset", handlerReset)
 	gatorCommands.registerCommand("users", handlerUsersList)
 	gatorCommands.registerCommand("agg", handlerAggregator)
