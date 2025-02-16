@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/WaronLimsakul/gator/internal/database"
 	"github.com/WaronLimsakul/gator/internal/rss"
@@ -62,7 +63,6 @@ func handlerRegister(s *state, cmd command) error {
 }
 
 func handlerReset(s *state, cmd command) error {
-	// only have user now
 	err := s.db.ResetUser(context.Background())
 	if err != nil {
 		return err
@@ -97,13 +97,24 @@ func handlerUsersList(s *state, cmd command) error {
 	return nil
 }
 
+// start collecing feed every specified duration
 func handlerAggregator(s *state, cmd command) error {
-	fetchedFeed, err := rss.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("A single argument required")
+	}
+
+	timeBetweenReqs := cmd.args[0]
+	fmt.Printf("Collecting feeds every %s", timeBetweenReqs)
+
+	durationBetweenReqs, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v", *fetchedFeed)
-	return nil
+
+	ticker := time.NewTicker(durationBetweenReqs)
+	for ; ; <-ticker.C {
+		rss.ScrapeFeeds(s.db)
+	}
 }
 
 func handlerAddFeed(s *state, cmd command, currentUser database.User) error {

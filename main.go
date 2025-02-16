@@ -14,7 +14,7 @@ import (
 
 type state struct {
 	config *config.Config
-	// basic the Queries type has all method which are SQL function
+	// basically, the Queries type has all method which are SQL function
 	db *database.Queries
 }
 
