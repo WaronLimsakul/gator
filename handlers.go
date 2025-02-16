@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/WaronLimsakul/gator/internal/database"
 	"github.com/WaronLimsakul/gator/internal/rss"
@@ -39,10 +38,8 @@ func handlerRegister(s *state, cmd command) error {
 	requestedName := cmd.args[0]
 
 	params := database.CreateUserParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name:      requestedName,
+		ID:   uuid.New(),
+		Name: requestedName,
 	}
 
 	// only thing that can go wrong here is that user name is taken
@@ -118,12 +115,10 @@ func handlerAddFeed(s *state, cmd command, currentUser database.User) error {
 	feedNameInput, urlInput := cmd.args[0], cmd.args[1]
 
 	feedParams := database.CreateFeedParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name:      feedNameInput,
-		Url:       urlInput,
-		UserID:    currentUser.ID,
+		ID:     uuid.New(),
+		Name:   feedNameInput,
+		Url:    urlInput,
+		UserID: currentUser.ID,
 	}
 
 	createdFeed, err := s.db.CreateFeed(context.Background(), feedParams)
@@ -132,11 +127,9 @@ func handlerAddFeed(s *state, cmd command, currentUser database.User) error {
 	}
 
 	feedFollowParam := database.CreateFeedFollowParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		UserID:    currentUser.ID,
-		FeedID:    createdFeed.ID,
+		ID:     uuid.New(),
+		UserID: currentUser.ID,
+		FeedID: createdFeed.ID,
 	}
 
 	_, err = s.db.CreateFeedFollow(context.Background(), feedFollowParam)
@@ -184,11 +177,9 @@ func handlerFollow(s *state, cmd command, creator database.User) error {
 	}
 
 	feedFollowParam := database.CreateFeedFollowParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		UserID:    creator.ID,
-		FeedID:    feed.ID,
+		ID:     uuid.New(),
+		UserID: creator.ID,
+		FeedID: feed.ID,
 	}
 
 	_, err = s.db.CreateFeedFollow(context.Background(), feedFollowParam)
