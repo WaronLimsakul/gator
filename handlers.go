@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/WaronLimsakul/gator/internal/database"
@@ -63,7 +64,12 @@ func handlerRegister(s *state, cmd command) error {
 }
 
 func handlerReset(s *state, cmd command) error {
-	err := s.db.ResetUser(context.Background())
+	err := s.db.ResetPosts(context.Background())
+	if err != nil {
+		return err
+	}
+
+	err = s.db.ResetUser(context.Background())
 	if err != nil {
 		return err
 	}
@@ -104,7 +110,7 @@ func handlerAggregator(s *state, cmd command) error {
 	}
 
 	timeBetweenReqs := cmd.args[0]
-	fmt.Printf("Collecting feeds every %s", timeBetweenReqs)
+	fmt.Printf("Collecting feeds every %s\n", timeBetweenReqs)
 
 	durationBetweenReqs, err := time.ParseDuration(cmd.args[0])
 	if err != nil {
@@ -240,5 +246,34 @@ func handlerUnfollow(s *state, cmd command, currentUser database.User) error {
 	}
 
 	fmt.Println("Unfollow successful")
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command) error {
+	var limit int
+	var err error
+
+	if len(cmd.args) != 1 {
+		limit = 2
+	}
+
+	limit, err = strconv.Atoi(cmd.args[0])
+	if err != nil {
+		return err
+	}
+
+	posts, err := s.db.GetPostsForUser(context.Background(), int32(limit))
+	if err != nil {
+		return err
+	}
+
+	for _, post := range posts {
+		fmt.Printf("Title: %s\n", post.Title)
+		fmt.Printf("Description: %s\n", post.Description)
+		fmt.Printf("Url: %s\n", post.Url)
+		fmt.Printf("Published date: %s\n", post.PublishedAt)
+		fmt.Println("---------------------------------------------")
+	}
+
 	return nil
 }

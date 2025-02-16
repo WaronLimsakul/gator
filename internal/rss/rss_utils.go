@@ -7,8 +7,10 @@ import (
 	"html"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/WaronLimsakul/gator/internal/database"
+	"github.com/google/uuid"
 )
 
 func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
@@ -49,7 +51,7 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 // 1. get the next feed to fetch from db
 // 2. mark it as fetched
 // 3. fetches the feed using the url
-// 4. print the items in the fetched feed.
+// 4. save the item in db.
 func ScrapeFeeds(db *database.Queries) error {
 	nextFeed, err := db.GetNextFeedToFetch(context.Background())
 	if err != nil {
@@ -67,13 +69,27 @@ func ScrapeFeeds(db *database.Queries) error {
 		return err
 	}
 
-	for _, feed := range (*fetchedFeed).Channel.Item {
-		fmt.Println("----------------------------------------")
-		fmt.Printf("Title: %s\n", feed.Title)
-		fmt.Printf("Description: %s\n", feed.Description)
-		fmt.Printf("Link: %s\n", feed.Link)
-		fmt.Printf("Pub Date: %s\n", feed.PubDate)
-	}
-	return nil
+	for _, item := range (*fetchedFeed).Channel.Item {
+		pubDate, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err != nil {
+			return err
+		}
 
+		_, err = db.CreatePost(
+			context.Background(),
+			database.CreatePostParams{
+				ID:          uuid.New(),
+				Title:       item.Title,
+				Url:         item.Link,
+				Description: item.Description,
+				PublishedAt: pubDate,
+				FeedID:      nextFeed.ID,
+			})
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("save post")
+	}
+
+	return nil
 }

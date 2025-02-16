@@ -68,6 +68,7 @@ func main() {
 	gatorCommands.registerCommand("follow", middlewareLoggedIn(handlerFollow))
 	gatorCommands.registerCommand("following", middlewareLoggedIn(handlerFollowsList))
 	gatorCommands.registerCommand("unfollow", middlewareLoggedIn(handlerUnfollow))
+	gatorCommands.registerCommand("browse", handlerBrowse)
 
 	// open database connection
 	db, err := sql.Open("postgres", curState.config.DbUrl)
