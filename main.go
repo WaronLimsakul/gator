@@ -63,10 +63,11 @@ func main() {
 	gatorCommands.registerCommand("reset", handlerReset)
 	gatorCommands.registerCommand("users", handlerUsersList)
 	gatorCommands.registerCommand("agg", handlerAggregator)
-	gatorCommands.registerCommand("addfeed", handlerAddFeed)
+	gatorCommands.registerCommand("addfeed", middlewareLoggedIn(handlerAddFeed))
 	gatorCommands.registerCommand("feeds", handlerFeedsList)
-	gatorCommands.registerCommand("follow", handlerFollow)
-	gatorCommands.registerCommand("following", handlerFollowsList)
+	gatorCommands.registerCommand("follow", middlewareLoggedIn(handlerFollow))
+	gatorCommands.registerCommand("following", middlewareLoggedIn(handlerFollowsList))
+	gatorCommands.registerCommand("unfollow", middlewareLoggedIn(handlerUnfollow))
 
 	// open database connection
 	db, err := sql.Open("postgres", curState.config.DbUrl)
